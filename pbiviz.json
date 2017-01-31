@@ -1,0 +1,23 @@
+{
+  "visual": {
+    "name": "bar",
+    "displayName": "Horizontal Bar",
+    "visualClassName": "Visual",
+    "version": "1.0.0",
+    "description": "",
+    "supportUrl": "",
+    "gitHubUrl": ""
+  },
+  "apiVersion": "1.4.0",
+  "author": {
+    "name": "Sam Echikson",
+    "email": "samuel.echikson@gmail.com"
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": [],
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "dependencies": "dependencies.json"
+}
