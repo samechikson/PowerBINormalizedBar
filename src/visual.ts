@@ -47,19 +47,17 @@ module powerbi.extensibility.visual {
    * @interface
    * @property {number} value             - Data value for point.
    * @property {string} category          - Corresponding category of data value.
-   * @property {string} color             - Color corresponding to data point.
-   * @property {ISelectionId} selectionId - Id assigned to data point for cross filtering
    *                                        and visual interaction.
    */
     interface BarDataPoint {
         value: PrimitiveValue;
         category: string;
-        color: string;
-        selectionId: ISelectionId;
     };
 
     export class Visual implements IVisual {
         private target: HTMLElement;
+        private svg: d3.Selection<SVGElement>;
+        private barContainer: d3.Selection<SVGElement>;
         private updateCount: number;
         private barSettings: BarSettings;
         private barDataPoints: BarDataPoint[];
@@ -69,9 +67,34 @@ module powerbi.extensibility.visual {
             this.target = options.element;
             this.updateCount = 0;
 
+            this.barDataPoints = [
+            {
+                value: 10,
+                category: 'a'
+            },
+            {
+                value: 20,
+                category: 'b'
+            },
+            {
+                value: 1,
+                category: 'c'
+            },
+            {
+                value: 100,
+                category: 'd'
+            },
+            {
+                value: 500,
+                category: 'e'
+            }];
+
             let svg = this.svg = d3.select(options.element)
               .append('svg')
               .classed('barChart', true);
+
+            this.barContainer = svg.append('g')
+                .classed('barContainer', true);
         }
 
         public update(options: VisualUpdateOptions) {
@@ -85,7 +108,19 @@ module powerbi.extensibility.visual {
 
           let width = options.viewport.width;
           let height = options.viewport.height;
-          console.log('Visual update', options);
+          console.log('Visual update', viewModel.dataPoints);
+
+          let bar = this.barContainer
+            .append('rect')
+            .attr('class', 'bar');
+
+          bar.attr({
+              width: 100,
+              height: 20,
+              y: 10,
+              x: 10,
+              fill: 0
+          });
 
         }
     }

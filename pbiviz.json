@@ -2,6 +2,7 @@
   "visual": {
     "name": "bar",
     "displayName": "Horizontal Bar",
+    "guid": "SAMECHIKSON01",
     "visualClassName": "Visual",
     "version": "1.0.0",
     "description": "",
