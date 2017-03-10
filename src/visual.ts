@@ -50,7 +50,7 @@ module powerbi.extensibility.visual {
    *                                        and visual interaction.
    */
     interface BarDataPoint {
-        value: PrimitiveValue;
+        value: number;
         category: string;
     };
 
@@ -68,33 +68,28 @@ module powerbi.extensibility.visual {
             this.updateCount = 0;
 
             this.barDataPoints = [
-            {
-                value: 10,
-                category: 'a'
-            },
-            {
-                value: 20,
-                category: 'b'
-            },
-            {
-                value: 1,
-                category: 'c'
-            },
-            {
-                value: 100,
-                category: 'd'
-            },
-            {
-                value: 500,
-                category: 'e'
-            }];
+                {
+                    value: 30,
+                    category: 'section1'
+                },
+                {
+                    value: 50,
+                    category: 'section2'
+                },
+                {
+                    value: 20,
+                    category: 'section3'
+                }
+            ];
 
             let svg = this.svg = d3.select(options.element)
-              .append('svg')
-              .classed('barChart', true);
+                .append('svg')
+                .classed('barChart', true);
 
             this.barContainer = svg.append('g')
                 .classed('barContainer', true);
+
+            console.log(findPercentile([1,23, 3,345,349,12], 25))
         }
 
         public update(options: VisualUpdateOptions) {
@@ -108,18 +103,27 @@ module powerbi.extensibility.visual {
 
           let width = options.viewport.width;
           let height = options.viewport.height;
-          console.log('Visual update', viewModel.dataPoints);
+          this.svg.attr({
+              width: width,
+              height: height
+          })
+          let xScaleBar = d3.scale.linear()
+              .domain([0,100])
+              .range([0,width])
 
-          let bar = this.barContainer
-            .append('rect')
-            .attr('class', 'bar');
+          let colorScale = d3.scale.category10();
+          // console.log('Visual update', viewModel.dataPoints);
 
-          bar.attr({
-              width: 100,
-              height: 20,
-              y: 10,
-              x: 10,
-              fill: 0
+          let bars = this.barContainer.selectAll('.bar').data(viewModel.dataPoints)
+              .enter().append('rect')
+              .attr('class', 'bar');
+
+          bars.attr({
+              width: d => xScaleBar(d.value),
+              height: height/2,
+              y: height/4,
+              x: d => xScaleBar(d.value),
+              fill: (d, i) => d3.scale.category20()('i')
           });
 
         }
