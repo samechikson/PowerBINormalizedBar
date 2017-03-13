@@ -63,28 +63,27 @@ module powerbi.extensibility.visual {
         private updateCount: number;
         private barSettings: BarSettings;
         private barDataPoints: BarDataPoint[];
+        private rawData: number[];
 
         constructor(options: VisualConstructorOptions) {
             console.log('Visual constructor', options);
             this.target = options.element;
             this.updateCount = 0;
-            let sortedData = _.sortBy([1,23, 3,345,349,12]);
-
-            console.log(findPercentile(sortedData, 25), findPercentile(sortedData, 75), findPercentile(sortedData, 99))
+            this.rawData = _.sortBy([1,23, 3,345,349,12]);
 
             this.barDataPoints = [
                 {
-                    value: findPercentile(sortedData, 25),
+                    value: findPercentile(this.rawData, 25),
                     category: 'section1',
                     color: '#EAEAEA'
                 },
                 {
-                    value: findPercentile(sortedData, 75),
+                    value: findPercentile(this.rawData, 75),
                     category: 'section2',
                     color: '#9edae5'
                 },
                 {
-                    value: findPercentile(sortedData, 99),
+                    value: findPercentile(this.rawData, 99),
                     category: 'section3',
                     color: '#EAEAEA'
                 }
@@ -96,8 +95,6 @@ module powerbi.extensibility.visual {
 
             this.barContainer = svg.append('g')
                 .classed('barContainer', true);
-
-            console.log(findPercentile(sortedData, 25))
         }
 
         public update(options: VisualUpdateOptions) {
@@ -118,6 +115,8 @@ module powerbi.extensibility.visual {
           let xScaleBar = d3.scale.linear()
               .domain([0,1])
               .range([0,width])
+
+          this.updateAverage(options, viewModel);
 
           //let colorScale = d3.scale.ordinal().domain([0,3]).range(['#2ca02c', '#d62728', '#ff7f0e', '#9edae5']);
           let colorScale = d3.scale.ordinal<string>().range(['#2ca02c', '#9edae5'])
@@ -143,8 +142,14 @@ module powerbi.extensibility.visual {
 
         }
 
-        public updateAverage(){
-
+        public updateAverage(options: VisualUpdateOptions, viewModel){
+            let circle = this.svg.append('circle');
+            circle.attr({
+                cy: options.viewport.height / 2,
+                cx: _.mean(this.rawData),
+                r: 25,
+                fill: '#000'
+            })
         }
     }
 }
