@@ -48,10 +48,12 @@ module powerbi.extensibility.visual {
    * @property {number} value             - Data value for point.
    * @property {string} category          - Corresponding category of data value.
    *                                        and visual interaction.
+   * @property {string} color             - Color of the bar.
    */
     interface BarDataPoint {
         value: number;
         category: string;
+        color: string;
     };
 
     export class Visual implements IVisual {
@@ -66,19 +68,25 @@ module powerbi.extensibility.visual {
             console.log('Visual constructor', options);
             this.target = options.element;
             this.updateCount = 0;
+            let sortedData = _.sortBy([1,23, 3,345,349,12]);
+
+            console.log(findPercentile(sortedData, 25), findPercentile(sortedData, 75), findPercentile(sortedData, 99))
 
             this.barDataPoints = [
                 {
-                    value: 30,
-                    category: 'section1'
+                    value: findPercentile(sortedData, 25),
+                    category: 'section1',
+                    color: '#EAEAEA'
                 },
                 {
-                    value: 50,
-                    category: 'section2'
+                    value: findPercentile(sortedData, 75),
+                    category: 'section2',
+                    color: '#9edae5'
                 },
                 {
-                    value: 20,
-                    category: 'section3'
+                    value: findPercentile(sortedData, 99),
+                    category: 'section3',
+                    color: '#EAEAEA'
                 }
             ];
 
@@ -89,7 +97,7 @@ module powerbi.extensibility.visual {
             this.barContainer = svg.append('g')
                 .classed('barContainer', true);
 
-            console.log(findPercentile([1,23, 3,345,349,12], 25))
+            console.log(findPercentile(sortedData, 25))
         }
 
         public update(options: VisualUpdateOptions) {
@@ -108,11 +116,11 @@ module powerbi.extensibility.visual {
               height: height
           })
           let xScaleBar = d3.scale.linear()
-              .domain([0,100])
+              .domain([0,1])
               .range([0,width])
 
           //let colorScale = d3.scale.ordinal().domain([0,3]).range(['#2ca02c', '#d62728', '#ff7f0e', '#9edae5']);
-          let colorScale = d3.scale.linear().domain([0, 5]).range([10, 100]);
+          let colorScale = d3.scale.ordinal<string>().range(['#2ca02c', '#9edae5'])
           // console.log('Visual update', viewModel.dataPoints);
 
           let bars = this.barContainer.selectAll('.bar').data(viewModel.dataPoints)
@@ -128,10 +136,14 @@ module powerbi.extensibility.visual {
                   for (let j=0; j<i; j++) {
                       xAccumulator += xScaleBar(this.barDataPoints[j].value) + 2
                   }
-                  return xAccumulator; 
+                  return xAccumulator;
               },
-              fill: (d, i) => colorScale(i)
+              fill: (d, i) => d.color
           });
+
+        }
+
+        public updateAverage(){
 
         }
     }
