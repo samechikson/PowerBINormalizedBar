@@ -111,7 +111,8 @@ module powerbi.extensibility.visual {
               .domain([0,100])
               .range([0,width])
 
-          let colorScale = d3.scale.category10();
+          //let colorScale = d3.scale.ordinal().domain([0,3]).range(['#2ca02c', '#d62728', '#ff7f0e', '#9edae5']);
+          let colorScale = d3.scale.linear().domain([0, 5]).range([10, 100]);
           // console.log('Visual update', viewModel.dataPoints);
 
           let bars = this.barContainer.selectAll('.bar').data(viewModel.dataPoints)
@@ -122,8 +123,14 @@ module powerbi.extensibility.visual {
               width: d => xScaleBar(d.value),
               height: height/2,
               y: height/4,
-              x: d => xScaleBar(d.value),
-              fill: (d, i) => d3.scale.category20()('i')
+              x: (d, i) => {
+                  let xAccumulator = 0;
+                  for (let j=0; j<i; j++) {
+                      xAccumulator += xScaleBar(this.barDataPoints[j].value) + 2
+                  }
+                  return xAccumulator; 
+              },
+              fill: (d, i) => colorScale(i)
           });
 
         }
