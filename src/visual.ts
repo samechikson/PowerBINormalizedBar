@@ -143,13 +143,19 @@ module powerbi.extensibility.visual {
         }
 
         public updateAverage(options: VisualUpdateOptions, viewModel){
-            let circle = this.svg.append('circle');
-            circle.attr({
-                cy: options.viewport.height / 2,
-                cx: _.mean(this.rawData),
-                r: 25,
-                fill: '#000'
+            let meanContainer = this.svg.append('g').classed('meanContainer', true);
+            meanContainer.attr({
+                transform: 'translate('+_.mean(this.rawData)+', '+options.viewport.height / 2+')'
             })
+            meanContainer.append('rect')
+              .attr({
+                  width: 25,
+                  height: 25,
+                  fill: '#ffffff',
+                  stroke: '#5A8F98',
+                  'stroke-width': 5,
+                  transform: 'rotate(45)'
+              })
         }
     }
 }
