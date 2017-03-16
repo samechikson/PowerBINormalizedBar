@@ -25,6 +25,7 @@
  */
 
 module powerbi.extensibility.visual {
+
   /**
    * Interface for BarChart settings.
    *
@@ -60,17 +61,14 @@ module powerbi.extensibility.visual {
         private target: HTMLElement;
         private svg: d3.Selection<SVGElement>;
         private barContainer: d3.Selection<SVGElement>;
-        private updateCount: number;
         private barSettings: BarSettings;
         private barDataPoints: BarDataPoint[];
         private rawData: number[];
+        private viewModel;
 
         constructor(options: VisualConstructorOptions) {
-            console.log('Visual constructor', options);
             this.target = options.element;
-            this.updateCount = 0;
-            this.rawData = _.sortBy([1,23, 3,345,349,12]);
-
+            this.rawData = _.sortBy([1,23, 3,345,349,12, 250, 203, 145, 203, 190]);
             this.barDataPoints = [
                 {
                     value: findPercentile(this.rawData, 25),
@@ -89,6 +87,13 @@ module powerbi.extensibility.visual {
                 }
             ];
 
+            this.viewModel = {
+                dataPoints: this.barDataPoints,
+                dataMax: this.rawData[this.rawData.length - 1],
+                dataMin: this.rawData[0],
+                settings: this.barSettings,
+            };
+
             let svg = this.svg = d3.select(options.element)
                 .append('svg')
                 .classed('barChart', true);
@@ -98,16 +103,13 @@ module powerbi.extensibility.visual {
         }
 
         public update(options: VisualUpdateOptions) {
-          let viewModel = {
-              dataPoints: this.barDataPoints,
-              dataMax: 10,
-              settings: this.barSettings,
-          };
+          let viewModel = this.viewModel;
           let settings = this.barSettings = viewModel.settings;
           this.barDataPoints = viewModel.dataPoints;
 
           let width = options.viewport.width;
           let height = options.viewport.height;
+
           this.svg.attr({
               width: width,
               height: height
@@ -116,13 +118,13 @@ module powerbi.extensibility.visual {
               .domain([0,1])
               .range([0,width])
 
-          this.updateAverage(options, viewModel);
+          this.updateAverage(options);
 
           //let colorScale = d3.scale.ordinal().domain([0,3]).range(['#2ca02c', '#d62728', '#ff7f0e', '#9edae5']);
           let colorScale = d3.scale.ordinal<string>().range(['#2ca02c', '#9edae5'])
           // console.log('Visual update', viewModel.dataPoints);
 
-          let bars = this.barContainer.selectAll('.bar').data(viewModel.dataPoints)
+          let bars = this.barContainer.selectAll('.bar').data(this.barDataPoints)
               .enter().append('rect')
               .attr('class', 'bar');
 
@@ -142,10 +144,13 @@ module powerbi.extensibility.visual {
 
         }
 
-        public updateAverage(options: VisualUpdateOptions, viewModel){
+        public updateAverage(options: VisualUpdateOptions){
             let meanContainer = this.svg.append('g').classed('meanContainer', true);
+            let xScale = d3.scale.linear()
+                .domain([this.viewModel.dataMin, this.viewModel.dataMax])
+                .range([0, options.viewport.width])
             meanContainer.attr({
-                transform: 'translate('+_.mean(this.rawData)+', '+options.viewport.height / 2+')'
+                transform: 'translate('+xScale(_.mean(this.rawData))+', '+options.viewport.height / 2+')'
             })
             meanContainer.append('rect')
               .attr({
